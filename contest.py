@@ -8,13 +8,33 @@ def tokenize(doc):
     tokens = synthai.tokenize(doc)
     return tokens
 
-def main():
-    document = open('Examples/question_list.txt','r')
+def TokenQuestion(file):
+    document = open(file,'r')
     for line in document:
         # doc_question = document.readline()
         line = line.split('::')
         token_question = tokenize(line[1])
+        FindInDoc(token_question)
         print(token_question)
+    return token_question
 
+def FindInDoc(keyword):
+    keywords = []
+    words = keyword.split("|")
+    for word in words:
+        key = word.split("/")
+        if(len(key) == 2):
+            if(key[1] == "NN"):
+                print(key[0])
+                keywords.append(key[0])
+            else: continue
+        else: continue
+    return keywords
+
+
+
+def main():
+    TokenQuestion('Examples/question_list.txt')
+    
 if __name__ == '__main__':
     main()
