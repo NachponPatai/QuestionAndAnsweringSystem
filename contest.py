@@ -30,6 +30,11 @@ def getQuestion():
         
         print("----------------------------")
         
+def findWord():
+    document = open('Examples/TokenSources/1.txt','r')
+    for doc in document:
+        if(doc == "/NN"):
+            print(doc)
 
 def SelectDoc(keyword):
     document = open('Examples/source_list.txt','r')
@@ -138,8 +143,8 @@ def isLocation(token):
 def main():
     # print(WriteDocTokenize('Examples/source_list.txt'))
     # print(TokenQuestion('Examples/question_list.txt'))
-    print(getQuestion())
-
+    # print(getQuestion())
+    findWord()
 
 if __name__ == '__main__':
     main()
