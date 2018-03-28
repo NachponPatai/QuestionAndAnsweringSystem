@@ -1,5 +1,5 @@
 from SynThai import SynThai
-
+import re
 
 synthai = SynThai('SynThai/0063-0.0412.hdf5', 60)
 
@@ -8,44 +8,74 @@ def QuesTokenize(doc):
     tokens = synthai.tokenize(doc[1])
     return tokens
 
-# def TokenQuestion(file):
-#     document = open(file,'r')
-#     for line in document:
-#         # doc_question = document.readline()
-#         line = line.split('::')
-#         token_question = synthai.tokenize(line[1])
-#         # print(token_question)
-#     return token_question
-
 def getQuestion():
     ques = open('Examples/question_list.txt','r')
     for line in ques:
         token_ques = QuesTokenize(line)
-        cut_ques = cutword(token_ques)
-        getType(cut_ques)
+        cut_ques,typecut = cutword(token_ques)
+        types = getType(cut_ques)
         keyword = findKeyword(token_ques)
         # findDoc(keyword)
         Doc = SelectDoc(keyword)
-        print(Doc)
-        
+        print(keyword)
+        findAns(keyword,Doc,types)
         print("----------------------------")
-        
-def findWord():
-    document = open('Examples/TokenSources/1.txt','r')
-    for doc in document:
-        if(doc == "/NN"):
-            print(doc)
+
+def findAns(keyword,doc,typeques):
+    ans = []*5
+    for docs in doc:
+        document = open('Examples/TokenSources/'+docs.rstrip(),'r')
+        for word in document:
+            words ,typeword = cutword(word)
+            for noun in keyword:
+                index = 0
+                for text in words:
+                    if(text == noun):
+                        if(typeques == "Numeric"):
+                            for typenoun in range(len(typeword)):
+                                if(typeword[typenoun] == "CD" and typeword[typenoun+1] == "CL"):
+                                    if(len(ans) < 5):
+                                        ans.append(words[typenoun]+" "+ words[typenoun+1])
+                                    else: 
+                                        print(ans)
+                                        return ans
+                        if(typeques == "Human"):
+                            for typehuman in range(len(typeword)):
+                                if((typeword[typehuman] == "NR" and typeword[typehuman+1] == "NR")):
+                                    if(len(ans) < 5):
+                                        if((words[typehuman]+" "+words[typehuman+1] in ans) == False):
+                                            ans.append(words[typehuman]+" "+words[typehuman+1])
+                                    else: 
+                                        print(ans)
+                                        return ans
+                        if(typeques == "Location"):
+                            for typeplace in range(len(typeword)):
+                                if(typeword[typeplace] == "NR" and typeword[typeplace+1] == "NN"):
+                                    if(len(ans) < 5):
+                                        if((words[typeplace] in ans) == False):
+                                            ans.append(words[typeplace])
+                                    else:
+                                        print(ans)
+                                        return ans
+                    index += 1
+    print(ans)
+
+
+# def splitDoc(source):
+#     document = open('Examples/TokenSources/'+source.rstrip(),'r')
+#     for word in document:
+#         words, typeword = cutword(word)
+#     return words, typeword
+
 
 def SelectDoc(keyword):
     document = open('Examples/source_list.txt','r')
     text = []
     for key in keyword:
-        print(key)
-        print("-------------")
         for doc in document:
             docs = open('Examples/TokenSources/'+doc.rstrip(),'r')
             for line in docs:
-                words = cutword(line)
+                words,typeword = cutword(line)
                 for word in words:
                     if(key == word):
                         doc.rstrip() in text
@@ -66,12 +96,14 @@ def findKeyword(token):
 
 def cutword(token):
     keyword = []
+    typekey = []
     words = token.split("|")
     for word in words:
         key = word.split('/')
         if(len(key) == 2):
             keyword.append(key[0])
-    return keyword
+            typekey.append(key[1])
+    return keyword , typekey
 
 def getType(token):
     for word in token:
@@ -114,37 +146,10 @@ def isLocation(token):
         return True
     else: return False
 
-# def FindInDoc(keyword):
-#     # source_document = open('Examples/source_list.txt','r')
-#     keywords = []
-#     typeword = []
-#     words = keyword.split("|")
-#     for word in words:
-#         key = word.split("/")
-#         if(len(key) == 2):
-#             if(key[1] == "NN"):
-#                 # print(key[0])
-#                 keywords.append(key[0])
-#                 typeword.append(key[1])
-#             else: continue
-#         else: continue
-        # for line in source_document:
-        #     doc = open('Examples/Sources/'+line.rstrip(),'r')
-        #     token_doc = tokenize(doc)
-        #     docs = token_doc.split("|")
-        #     docword = doc.split("/")
-        #     if(len(docword) == 2):
-        #         list_doc.append(docword[0])
-        #         print(list_doc)
-    
-
-
-
 def main():
     # print(WriteDocTokenize('Examples/source_list.txt'))
     # print(TokenQuestion('Examples/question_list.txt'))
-    # print(getQuestion())
-    findWord()
+    print(getQuestion())
 
 if __name__ == '__main__':
     main()
